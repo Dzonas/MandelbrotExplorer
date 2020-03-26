@@ -16,6 +16,8 @@ void error_callback(int error_code, const char *description);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
+void window_size_callback(GLFWwindow* window, int width, int height);
+
 static float vertices[] = {
         1.0f, -1.0f, 0.0f,
         1.0f, 1.0f, 0.0f,
@@ -64,6 +66,7 @@ int main() {
 
     GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Mandelbrot Explorer", nullptr, nullptr);
     glfwSetKeyCallback(window, &key_callback);
+    glfwSetWindowSizeCallback(window, &window_size_callback);
     glfwSetWindowUserPointer(window, &camera);
     glfwMakeContextCurrent(window);
 
@@ -161,3 +164,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
+void window_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
