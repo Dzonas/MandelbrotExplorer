@@ -5,6 +5,8 @@ You can use it to move around the fractal and zoom into it.
 Controls:
 - Q/E - zoom OUT/IN
 - W/A/S/D - move UP/LEFT/DOWN/RIGHT
+
+![main window](https://github.com/Dzonas/MandelbrotExplorer/blob/master/screenshot.png)
   
 ## Requirements
 - CMake 3.13
