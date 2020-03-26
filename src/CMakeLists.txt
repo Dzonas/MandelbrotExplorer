@@ -1,0 +1,1 @@
+add_executable(MandelbrotExplorer main.cpp Shader.h Shader.cpp utility.h)
