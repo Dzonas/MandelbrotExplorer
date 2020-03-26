@@ -2,3 +2,6 @@
 	path = external/glm
 	url = https://github.com/g-truc/glm
 	branch = 0.9.9.7
+[submodule "external/glfw"]
+	path = external/glfw
+	url = https://github.com/glfw/glfw
