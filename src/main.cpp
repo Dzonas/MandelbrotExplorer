@@ -11,6 +11,7 @@ const int WINDOW_HEIGHT = 800;
 const int FPS_ARRAY_LENGTH = 100;
 const float STEP_SIZE = 0.1f;
 const float ZOOM = 0.5f;
+const int COLORMAP_SIZE = 16;
 
 void error_callback(int error_code, const char *description);
 
@@ -27,23 +28,23 @@ static float vertices[] = {
         -1.0f, -1.0f, 0.0f
 };
 
-static float colormap[] = {
-        66, 30, 15,
-        25, 7, 26,
-        9, 1, 47,
-        4, 4, 73,
-        0, 7, 100,
-        12, 44, 138,
-        24, 82, 177,
-        57, 125, 209,
-        134, 181, 229,
-        211, 236, 248,
-        241, 233, 191,
-        248, 201, 95,
-        255, 170, 0,
-        204, 128, 0,
-        153, 87, 0,
-        106, 52, 3
+static float colormap[COLORMAP_SIZE][3] = {
+    {66, 30, 15},
+    {25, 7, 26},
+    {9, 1, 47},
+    {4, 4, 73},
+    {0, 7, 100},
+    {12, 44, 138},
+    {24, 82, 177},
+    {57, 125, 209},
+    {134, 181, 229},
+    {211, 236, 248},
+    {241, 233, 191},
+    {248, 201, 95},
+    {255, 170, 0},
+    {204, 128, 0},
+    {153, 87, 0},
+    {106, 52, 3}
 };
 
 struct Camera {
@@ -80,7 +81,7 @@ int main() {
     Shader shader;
     shader.init("shaders/vertex.glsl", "shaders/fragment.glsl");
     shader.use();
-    shader.set_float_array("colormap", 48, colormap);
+    shader.set_vec3("colormap", colormap[0], COLORMAP_SIZE);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);

@@ -3,7 +3,7 @@
 in vec2 ex_pos;
 out vec4 frag_color;
 
-uniform float colormap[48];
+uniform vec3 colormap[16];
 
 vec2 multiply(vec2 a, vec2 b) {
     float k1 = b.x * (a.x + a.y);
@@ -24,7 +24,7 @@ void main() {
     if(i == 100) {
         frag_color = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
-        int j = 3 * (i % 16);
-        frag_color = vec4(colormap[j] / 255.0, colormap[j+1] / 255.0, colormap[j+2] / 255.0, 1.0);
+        int j = i % 16;
+        frag_color = vec4(colormap[j].x / 255.0, colormap[j].y / 255.0, colormap[j].z / 255.0, 1.0);
     }
 }

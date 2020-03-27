@@ -21,6 +21,10 @@ public:
   void set_vec3(const std::string &name, glm::vec3 &value) {
     glUniform3fv(glGetUniformLocation(program, name.c_str()), 1, glm::value_ptr(value));
   }
+  void set_vec3(const std::string& name, const float value[], const unsigned int count = 1) const {
+    glUniform3fv(glGetUniformLocation(program, name.c_str()), count, value);
+    auto error = glGetError();
+  }
   void set_mat3(const std::string &name, glm::mat3 &value) {
     glUniformMatrix3fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
   }
