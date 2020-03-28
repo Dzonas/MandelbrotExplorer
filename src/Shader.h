@@ -28,6 +28,9 @@ public:
   void set_mat3(const std::string &name, glm::mat3 &value) {
     glUniformMatrix3fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
   }
+  void set_uint(const std::string &name, unsigned int value, unsigned int count = 1) const {
+      glUniform1uiv(glGetUniformLocation(program, name.c_str()), count, &value);
+  }
 
   void set_float_array(const std::string &name, unsigned int count, const float *value) {
       glUniform1fv(glGetUniformLocation(program, name.c_str()), count, value);

@@ -12,6 +12,7 @@ const int FPS_ARRAY_LENGTH = 100;
 const float STEP_SIZE = 0.1f;
 const float ZOOM = 0.5f;
 const int COLORMAP_SIZE = 16;
+const unsigned int ITERATIONS = 100;
 
 void error_callback(int error_code, const char *description);
 
@@ -88,6 +89,7 @@ int main() {
         }
     }
     shader.set_vec3("colormap", scaled_colormap[0], COLORMAP_SIZE);
+    shader.set_uint("iterations", ITERATIONS);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
