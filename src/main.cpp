@@ -81,7 +81,13 @@ int main() {
     Shader shader;
     shader.init("shaders/vertex.glsl", "shaders/fragment.glsl");
     shader.use();
-    shader.set_vec3("colormap", colormap[0], COLORMAP_SIZE);
+    float scaled_colormap[COLORMAP_SIZE][3];
+    for(int i = 0; i < COLORMAP_SIZE; i++) {
+        for(int j = 0; j < 3; j++) {
+            scaled_colormap[i][j] = colormap[i][j] / 255.0f;
+        }
+    }
+    shader.set_vec3("colormap", scaled_colormap[0], COLORMAP_SIZE);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
