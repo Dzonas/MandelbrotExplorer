@@ -22,5 +22,8 @@ cmake --build . --config Release
 
 ## Run
 ```
-./bin/MandelbrotExplorer
+./bin/MandelbrotExplorer --resolution <width>x<height> --iterations <i>
 ```
+Parameters:
+- Window resolution (default 1600x800)
+- Convergence test iterations (default 100)

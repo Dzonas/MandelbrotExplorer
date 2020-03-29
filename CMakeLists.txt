@@ -27,3 +27,8 @@ target_link_libraries(MandelbrotExplorer PRIVATE glad)
 set(GLM_DIR ${LIB_DIR}/glm)
 add_subdirectory(${GLM_DIR})
 target_link_libraries(MandelbrotExplorer PRIVATE glm::glm)
+
+# CXXopts Library
+set(CXXOPTS_DIR ${LIB_DIR}/cxxopts)
+add_subdirectory(${CXXOPTS_DIR})
+target_link_libraries(MandelbrotExplorer PRIVATE cxxopts)

@@ -4,21 +4,29 @@
 #include <glm/glm.hpp>
 #include <stdexcept>
 #include <string>
+#include <cxxopts.hpp>
 #include "Shader.h"
 
-const int WINDOW_WIDTH = 1600;
-const int WINDOW_HEIGHT = 800;
 const int FPS_ARRAY_LENGTH = 100;
 const float STEP_SIZE = 0.1f;
 const float ZOOM = 0.5f;
 const int COLORMAP_SIZE = 16;
-const unsigned int ITERATIONS = 100;
+const char *DEFAULT_WINDOW_RESOLUTION = "1600x800";
+const char *DEFAULT_ITERATIONS = "100";
+
+struct Configuration {
+    int width;
+    int height;
+    unsigned int iterations;
+};
+
+Configuration parse_arguments(int argc, char *argv[]);
 
 void error_callback(int error_code, const char *description);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
-void window_size_callback(GLFWwindow* window, int width, int height);
+void window_size_callback(GLFWwindow *window, int width, int height);
 
 static float vertices[] = {
         1.0f, -1.0f, 0.0f,
@@ -30,22 +38,22 @@ static float vertices[] = {
 };
 
 static float colormap[COLORMAP_SIZE][3] = {
-    {66, 30, 15},
-    {25, 7, 26},
-    {9, 1, 47},
-    {4, 4, 73},
-    {0, 7, 100},
-    {12, 44, 138},
-    {24, 82, 177},
-    {57, 125, 209},
-    {134, 181, 229},
-    {211, 236, 248},
-    {241, 233, 191},
-    {248, 201, 95},
-    {255, 170, 0},
-    {204, 128, 0},
-    {153, 87, 0},
-    {106, 52, 3}
+        {66,  30,  15},
+        {25,  7,   26},
+        {9,   1,   47},
+        {4,   4,   73},
+        {0,   7,   100},
+        {12,  44,  138},
+        {24,  82,  177},
+        {57,  125, 209},
+        {134, 181, 229},
+        {211, 236, 248},
+        {241, 233, 191},
+        {248, 201, 95},
+        {255, 170, 0},
+        {204, 128, 0},
+        {153, 87,  0},
+        {106, 52,  3}
 };
 
 struct Camera {
@@ -55,7 +63,8 @@ struct Camera {
     float height;
 };
 
-int main() {
+int main(int argc, char *argv[]) {
+    Configuration config = parse_arguments(argc, argv);
     glfwSetErrorCallback(&error_callback);
     glfwInit();
 
@@ -64,9 +73,9 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-    Camera camera{0.0f, 0.0f, 2.0f * static_cast<float>(WINDOW_WIDTH) / static_cast<float>(WINDOW_HEIGHT), 2.0f};
+    Camera camera{0.0f, 0.0f, 2.0f * static_cast<float>(config.width) / static_cast<float>(config.height), 2.0f};
 
-    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Mandelbrot Explorer", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(config.width, config.height, "Mandelbrot Explorer", nullptr, nullptr);
     glfwSetKeyCallback(window, &key_callback);
     glfwSetWindowSizeCallback(window, &window_size_callback);
     glfwSetWindowUserPointer(window, &camera);
@@ -83,13 +92,13 @@ int main() {
     shader.init("shaders/vertex.glsl", "shaders/fragment.glsl");
     shader.use();
     float scaled_colormap[COLORMAP_SIZE][3];
-    for(int i = 0; i < COLORMAP_SIZE; i++) {
-        for(int j = 0; j < 3; j++) {
+    for (int i = 0; i < COLORMAP_SIZE; i++) {
+        for (int j = 0; j < 3; j++) {
             scaled_colormap[i][j] = colormap[i][j] / 255.0f;
         }
     }
     shader.set_vec3("colormap", scaled_colormap[0], COLORMAP_SIZE);
-    shader.set_uint("iterations", ITERATIONS);
+    shader.set_uint("iterations", config.iterations);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
@@ -145,6 +154,33 @@ int main() {
     return 0;
 }
 
+
+Configuration parse_arguments(int argc, char **argv) {
+    cxxopts::Options options("Mandelbrot Explorer", "Mandelbrot fractal explorer in OpenGL");
+    options
+            .allow_unrecognised_options()
+            .add_options()
+                    ("r,resolution", "Change window resolution",
+                     cxxopts::value<std::string>()->default_value(DEFAULT_WINDOW_RESOLUTION))
+                    ("i,iterations", "Number of iterations in the convergence test",
+                     cxxopts::value<unsigned int>()->default_value(DEFAULT_ITERATIONS));
+    auto result = options.parse(argc, argv);
+
+    std::string res = result["resolution"].as<std::string>();
+    auto v = res.find('x');
+    if (v > res.size())
+        throw std::runtime_error("wrong resolution format");
+    auto width = std::stoi(res.substr(0, v));
+    auto height = std::stoi(res.substr(v + 1, res.size()));
+
+    if (width < 0 || height < 0)
+        throw std::runtime_error("resolution can't be negative");
+
+    unsigned int iterations = result["iterations"].as<unsigned int>();
+
+    return Configuration{width, height, iterations};
+}
+
 void error_callback(int error_code, const char *description) {
     throw std::runtime_error(std::to_string(error_code) + ": " + description);
 }
@@ -173,6 +209,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
-void window_size_callback(GLFWwindow* window, int width, int height) {
+void window_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
