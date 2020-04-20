@@ -26,6 +26,6 @@ void main() {
         frag_color = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
         uint j = i % 16;
-        frag_color = vec4(colormap[j].x, colormap[j].y, colormap[j].z, 1.0);
+        frag_color = vec4(colormap[j], 1.0);
     }
 }
