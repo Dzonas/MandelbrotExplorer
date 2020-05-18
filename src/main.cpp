@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 #include <cxxopts.hpp>
 #include "Shader.h"
 
@@ -12,12 +13,13 @@ const float STEP_SIZE = 0.1f;
 const float ZOOM = 0.5f;
 const int COLORMAP_SIZE = 16;
 const char *DEFAULT_WINDOW_RESOLUTION = "1600x800";
-const char *DEFAULT_ITERATIONS = "100";
+const unsigned int DEFAULT_ITERATIONS = 100;
+const unsigned int MAX_ITERATIONS = 2000;
+const unsigned int MIN_ITERATIONS = 100;
 
 struct Configuration {
     int width;
     int height;
-    unsigned int iterations;
 };
 
 Configuration parse_arguments(int argc, char *argv[]);
@@ -63,6 +65,11 @@ struct Camera {
     float height;
 };
 
+struct KeyCallbackRegister {
+    Camera *camera;
+    unsigned int *iterations;
+};
+
 int main(int argc, char *argv[]) {
     Configuration config = parse_arguments(argc, argv);
     glfwSetErrorCallback(&error_callback);
@@ -74,11 +81,13 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     Camera camera{0.0f, 0.0f, 2.0f * static_cast<float>(config.width) / static_cast<float>(config.height), 2.0f};
+    unsigned int iterations = DEFAULT_ITERATIONS;
+    KeyCallbackRegister callback_register = {&camera, &iterations};
 
     GLFWwindow *window = glfwCreateWindow(config.width, config.height, "Mandelbrot Explorer", nullptr, nullptr);
     glfwSetKeyCallback(window, &key_callback);
     glfwSetWindowSizeCallback(window, &window_size_callback);
-    glfwSetWindowUserPointer(window, &camera);
+    glfwSetWindowUserPointer(window, &callback_register);
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -98,7 +107,7 @@ int main(int argc, char *argv[]) {
         }
     }
     shader.set_vec3("colormap", scaled_colormap[0], COLORMAP_SIZE);
-    shader.set_uint("iterations", config.iterations);
+    shader.set_uint("iterations", iterations);
 
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
@@ -127,6 +136,7 @@ int main(int argc, char *argv[]) {
         view = glm::translate(view, glm::vec3(camera.center_x * (1.0f / camera.width),
                                               camera.center_y * (1.0f / camera.height), 0.0f));
         shader.set_mat4("view", view);
+        shader.set_uint("iterations", iterations);
 
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -161,9 +171,7 @@ Configuration parse_arguments(int argc, char **argv) {
             .allow_unrecognised_options()
             .add_options()
                     ("r,resolution", "Change window resolution",
-                     cxxopts::value<std::string>()->default_value(DEFAULT_WINDOW_RESOLUTION))
-                    ("i,iterations", "Number of iterations in the convergence test",
-                     cxxopts::value<unsigned int>()->default_value(DEFAULT_ITERATIONS));
+                     cxxopts::value<std::string>()->default_value(DEFAULT_WINDOW_RESOLUTION));
     auto result = options.parse(argc, argv);
 
     std::string res = result["resolution"].as<std::string>();
@@ -176,9 +184,7 @@ Configuration parse_arguments(int argc, char **argv) {
     if (width < 0 || height < 0)
         throw std::runtime_error("resolution can't be negative");
 
-    unsigned int iterations = result["iterations"].as<unsigned int>();
-
-    return Configuration{width, height, iterations};
+    return Configuration{width, height};
 }
 
 void error_callback(int error_code, const char *description) {
@@ -186,26 +192,34 @@ void error_callback(int error_code, const char *description) {
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    auto camera = (Camera *) glfwGetWindowUserPointer(window);
+    auto callback_register = (KeyCallbackRegister *) glfwGetWindowUserPointer(window);
     if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-        camera->center_x += camera->width * STEP_SIZE;
+        callback_register->camera->center_x += callback_register->camera->width * STEP_SIZE;
     }
     if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        camera->center_x -= camera->width * STEP_SIZE;
+        callback_register->camera->center_x -= callback_register->camera->width * STEP_SIZE;
     }
     if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        camera->center_y += camera->height * STEP_SIZE;
+        callback_register->camera->center_y += callback_register->camera->height * STEP_SIZE;
     }
     if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        camera->center_y -= camera->height * STEP_SIZE;
+        callback_register->camera->center_y -= callback_register->camera->height * STEP_SIZE;
     }
     if (key == GLFW_KEY_E && action == GLFW_PRESS) {
-        camera->width *= ZOOM;
-        camera->height *= ZOOM;
+        callback_register->camera->width *= ZOOM;
+        callback_register->camera->height *= ZOOM;
     }
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-        camera->width *= 1.0f / ZOOM;
-        camera->height *= 1.0f / ZOOM;
+        callback_register->camera->width *= 1.0f / ZOOM;
+        callback_register->camera->height *= 1.0f / ZOOM;
+    }
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        *callback_register->iterations = std::clamp(*callback_register->iterations + 100, MIN_ITERATIONS, MAX_ITERATIONS);
+        std::cout << "Iterations: " << *callback_register->iterations << std::endl;
+    }
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+        *callback_register->iterations = std::clamp(*callback_register->iterations - 100, MIN_ITERATIONS, MAX_ITERATIONS);
+        std::cout << "Iterations: " << *callback_register->iterations << std::endl;
     }
 }
 

@@ -22,7 +22,7 @@ void main() {
         i++;
     }
 
-    if(i == 100) {
+    if(i == iterations) {
         frag_color = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
         uint j = i % 16;
