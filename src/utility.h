@@ -1,5 +1,5 @@
-#ifndef OPENGL_TUTORIAL_SRC_UTILITY_H
-#define OPENGL_TUTORIAL_SRC_UTILITY_H
+#ifndef MANDELBROTEXPLORER_SRC_UTILITY_H
+#define MANDELBROTEXPLORER_SRC_UTILITY_H
 
 #include <string>
 #include <sstream>
@@ -17,4 +17,4 @@ std::string load_file(const std::string& path) {
   return ss.str();
 }
 
-#endif //OPENGL_TUTORIAL_SRC_UTILITY_H
+#endif //MANDELBROTEXPLORER_SRC_UTILITY_H

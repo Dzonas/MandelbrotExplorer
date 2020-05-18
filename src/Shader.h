@@ -1,5 +1,5 @@
-#ifndef OPENGL_TUTORIAL_SRC_SHADER_H
-#define OPENGL_TUTORIAL_SRC_SHADER_H
+#ifndef MANDELBROTEXPLORER_SRC_SHADER_H
+#define MANDELBROTEXPLORER_SRC_SHADER_H
 
 #include <glad/glad.h>
 #include <string>
@@ -37,4 +37,4 @@ public:
   }
 };
 
-#endif //OPENGL_TUTORIAL_SRC_SHADER_H
+#endif //MANDELBROTEXPLORER_SRC_SHADER_H
